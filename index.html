@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Buckeye Ops">
+<meta name="theme-color" content="#2A6F4D">
+<meta name="robots" content="noindex">
+<title>Buckeye Operations Dashboard</title>
+<!-- No favicon request: this page makes NO network requests of its own. -->
+<link rel="icon" href="data:,">
+<script>
+  // THE ONE CONSTANT: the production /exec URL of the Buckeye Operations Dashboard.
+  // (Deployment ID from docs/Deployments.md in the OpsDashboard repo; match the FULL ID.)
+  var EXEC_URL = 'https://script.google.com/macros/s/AKfycbyAlVWmW73kej8URAfpKKIFNgqi2ioHVil3nBIHb15pnRLV3VMzjC9uq50jyK4222k/exec';
+</script>
+<style>
+  :root {
+    --bg: #f6f7f5;
+    --fg: #1d2b23;
+    --muted: #5f6d64;
+    --accent: #2A6F4D;
+    --track: #d9e3dc;
+    --btn-fg: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121814;
+      --fg: #e6eee8;
+      --muted: #9aaba0;
+      --accent: #5fbf8c;
+      --track: #26332b;
+      --btn-fg: #0d1410;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121814;
+    --fg: #e6eee8;
+    --muted: #9aaba0;
+    --accent: #5fbf8c;
+    --track: #26332b;
+    --btn-fg: #0d1410;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+  main { text-align: center; max-width: 360px; width: 100%; }
+  .org { font-size: 15px; font-weight: 600; letter-spacing: 0.02em; color: var(--muted); margin: 0 0 4px; }
+  h1 { font-size: 24px; font-weight: 700; margin: 0 0 32px; line-height: 1.25; }
+  .spinner {
+    width: 44px; height: 44px; margin: 0 auto 20px;
+    border: 4px solid var(--track);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } }
+  .status { font-size: 17px; font-weight: 600; margin: 0 0 6px; }
+  .hint { font-size: 14px; color: var(--muted); margin: 0; }
+  .slow { margin-top: 28px; }
+  .slow[hidden] { display: none; }
+  .slow p { font-size: 14px; color: var(--muted); margin: 0 0 12px; }
+  .slow button {
+    font: inherit; font-size: 15px; font-weight: 600;
+    color: var(--btn-fg); background: var(--accent);
+    border: 0; border-radius: 10px; padding: 12px 22px; min-height: 44px; cursor: pointer;
+  }
+  .slow button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <p class="org">Buckeye MH Communities</p>
+  <h1>Operations Dashboard</h1>
+  <div class="spinner" role="progressbar" aria-label="Loading"></div>
+  <p class="status" aria-live="polite">Loading…</p>
+  <p class="hint">Usually 10–15 seconds</p>
+  <div class="slow" id="slow" hidden>
+    <p>Taking too long?</p>
+    <button type="button" id="retry">Try again</button>
+  </div>
+</main>
+<script>
+  (function () {
+    // "Try again" reloads THIS loader, which redirects afresh. No automatic retry loop.
+    document.getElementById('retry').addEventListener('click', function () { location.reload(); });
+
+    // Reveal the escape hatch after 30 s. The loader stays on screen while the app's first
+    // response is on its way, so this timer is still running if the app is slow.
+    setTimeout(function () { document.getElementById('slow').hidden = false; }, 30000);
+
+    // Redirect AFTER first paint, so the loader is what the person sees while the app starts.
+    // location.replace keeps the loader out of the back history. Any query string on the
+    // loader's own URL (e.g. ?view=tasks) is passed through to the app unchanged.
+    function go() {
+      setTimeout(function () { location.replace(EXEC_URL + (location.search || '')); }, 100);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go);
+    else go();
+  })();
+</script>
+</body>
+</html>
